@@ -89,6 +89,46 @@ correct_dates <- function(data){
                format="%Y%m%d %H:%M", #YYYYMMDD HH:MM
                tz="GMT")
   
-  data_names$date_time <- lapply(data$date_time, set_correct_date) 
+  data_names$date_time <- lapply(data$date_time, set_correct_date) %>% 
+    unlist()
+  data_names
   
+}
+
+#Drops the ? from the end of uncertain entries
+remove_uncertain_data <- function(data){
+  for( i in 1:nrow(data)){
+    curr_species <- data$art[i]
+    
+    # Do not stop because of NA values (if they are to be left in)
+    # Do not change ???-values
+    if( is.na(curr_species) | curr_species == '???'){
+      next
+    }
+    
+    #If there is a ?, remove it. Assumes the ? is the last character
+    if( !is.na(str_extract(curr_species, "\\?"))){
+      data$art[i] <- substr(curr_species, 1, nchar(curr_species)-1)
+    }
+  }
+  data
+}
+
+#Spread the data so that it counts the species occurrences per night.
+spread_by_date <- function(data, startdate="2023/3/1", enddate="2023/12/15"){
+  # Generate a date series for joining data on
+  time_series <- seq(as.Date(startdate), as.Date(enddate), "days") %>% 
+    str_replace_all("-","") %>% 
+    as.data.frame()
+  names(time_series) <- "date_time"
+  
+  # Spread the data to wide format and count species by day 
+  date_count <- data %>%
+    count(date_time, art) %>% 
+    pivot_wider(names_from = art, values_from = n, values_fill = 0)
+  
+  # Join species info on time series
+  data <- left_join(time_series, date_count)  
+  
+  data
 }
