@@ -4,6 +4,7 @@ require(tidyr)
 require(readxl)
 require(stringr) #To be able to change entries to title case
 require(jsonlite)
+require(writexl)
 
 source("./cleanup_functions.R")
 
@@ -15,17 +16,21 @@ main <- function(save_report_copy = FALSE){
   # Change columns to snake case and drop unused columns
   data <- cleanup_columns(data_raw)
   
+  # Change morning times to previous date, and drop timestamp from datetime. 
+  data <- correct_dates(data)
+  
+  n_recording_day <- data %>% 
+    count(date_time)
+  
   # Convert to long format based on species columns
-  data_clean <- unify_columns(data)
+  data <- unify_columns(data)
   
   # Correct species entries to standardized entries
   #TODO: Increase functionality so that it checks against accepted and known 
   #erroneous values, lists unfamiliar values, and asks you if you want to stop.
-  data_names <- cleanup_species_names(data_clean)
+  data <- cleanup_species_names(data)
   
-  # Change morning times to previous date, and drop timestamp from datetime. 
-  data_dates <- correct_dates(data_names)
-  
+ 
   # Export a copy of current dataset for use in Artportalen if requested
   #TODO: Check that this is actually a useable format and make appropriate
   # changes.
@@ -39,20 +44,24 @@ main <- function(save_report_copy = FALSE){
   # Clean out question marks from species entries
   # This is a temporary function that will not be needed for the complete data
   # as there will be no ? in that dataset.
-  data_certain <- remove_uncertain_data(data_dates)
+  data <- remove_uncertain_data(data)
   
+  social_calls <- data %>% 
+    select(c("sociala", "date_time"))
   # Spread the data so that it counts the species occurrences per night.
-  data_wide <- spread_by_date(data_certain)
+  data <- spread_by_date(data)
 
-    
-  #TODO: Sum total of files by row
+  # Check for social calls and attach as appropriate
+  data <-count_social_calls(data, social_calls)
   
-  #TODO: Check for social calls and attach as appropriate
+  # Attach number of calls per night
+  data <- attach_obs_count(data, n_recording_day)
   
   #TODO: Connect to SMHI-API and get mean weather values for the night
   
-  
+  data
 }
 
 data_file <- main()
-data_file
+write_xlsx(data_file, "./example.xlsx")
+

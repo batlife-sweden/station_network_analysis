@@ -16,6 +16,7 @@ cleanup_columns <- function(data){
 cleanup_species_names <-function(data, 
                                  correction_file="corrections.json"){
   # Change entries to title case.
+  data$art <- str_replace_all(data$art, " ", "")
   data$art <- str_to_title(data$art)
   
   # Read the file with known erroneous entries and their corresponding 
@@ -89,9 +90,10 @@ correct_dates <- function(data){
                format="%Y%m%d %H:%M", #YYYYMMDD HH:MM
                tz="GMT")
   
-  data_names$date_time <- lapply(data$date_time, set_correct_date) %>% 
+  data$date_time <- lapply(data$date_time, set_correct_date) %>% 
     unlist()
-  data_names
+  
+  data
   
 }
 
@@ -122,13 +124,45 @@ spread_by_date <- function(data, startdate="2023/3/1", enddate="2023/12/15"){
     as.data.frame()
   names(time_series) <- "date_time"
   
+  names(data)[names(data) == ''] <- 'Blank'
+  
   # Spread the data to wide format and count species by day 
   date_count <- data %>%
-    count(date_time, art) %>% 
-    pivot_wider(names_from = art, values_from = n, values_fill = 0)
+    count(date_time, art) %>%
+    pivot_wider(names_from = art,
+                values_from = n, values_fill = 0)
   
   # Join species info on time series
   data <- left_join(time_series, date_count)  
   
   data
+}
+
+sum_observations <- function(data){
+  tot_n_cols <- ncol(data)
+  
+  data <- data %>% 
+    replace(is.na(.), 0) %>%
+    mutate("tot_files" = rowSums((data[,2:tot_n_cols]), na.rm = TRUE))
+  
+  data  
+}
+
+count_social_calls <- function(obs_data, call_data){
+  call_data$sociala <- call_data$sociala %>% 
+    is.na() %>% 
+    if_else(0, 1)
+  
+  call_data <- call_data %>%  
+    group_by(date_time) %>%
+    summarise(n_social_calls = sum(sociala))
+  
+  data <- left_join(obs_data, call_data)
+  
+  data
+}
+
+# Attach number of calls per night
+attach_obs_count <- function(data, n_recordings){
+  left_join(data,n_recordings)
 }
