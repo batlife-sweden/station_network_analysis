@@ -1,6 +1,8 @@
 # Untracked files
 *.xlsx
 .Rproj.user
+.Rhistory
 
 #Lockfiles
 .~*
+*.tmp
