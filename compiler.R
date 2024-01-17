@@ -23,7 +23,8 @@ main <- function(save_report_copy = FALSE){
     count(date_time)
   
   # Convert to long format based on species columns
-  data <- unify_columns(data)
+  data <- unify_columns(data=data,
+                        species_columns= c("art_1", "art_2" ,"art_3"))
   
   # Correct species entries to standardized entries
   #TODO: Increase functionality so that it checks against accepted and known 

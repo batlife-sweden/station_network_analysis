@@ -39,29 +39,35 @@ cleanup_species_names <-function(data,
 }
 
 
-# Combines the art_1/2/3 columns into one without including empty rows from 2
-# and 3
-unify_columns <- function(data){
+# Combines the art_1/2/3... columns into one without including empty rows, or 
+# social call info from subsequent columns 
+unify_columns <- function(data, 
+                          species_columns= c("art_1", "art_2" ,"art_3") ){
   
-  
-  # TODO: Make this prettier and more scaleable by putting df's in a list
+  # Extract the primary species column
   data_new <- data %>% 
-    select(-c("art_2", "art_3"))
-  data_spec_2 <- data %>% 
-    select(-c("art_1", "art_3"))
-  data_spec_3 <- data %>% 
-    select(-c("art_1", "art_2"))
+    select(!all_of(species_columns[-1]))
   
-  # Removes empty rows and then append the result to data_new
-  data_spec_2 <- data_spec_2[!is.na(data_spec_2$art_2),]
-  data_spec_3 <- data_spec_3[!is.na(data_spec_3$art_3),]
-  
-  names(data_spec_2) <- names(data_new)
-  names(data_spec_3) <- names(data_new)
-  
-  data_new <- bind_rows(data_new, data_spec_2)
-  data_new <- bind_rows(data_new, data_spec_3)
-  
+  # Extract all the other species columns 
+  col_count <- length(species_columns)
+
+  for( i in 1:(col_count-1)){
+    to_drop <- species_columns[-(i+1)] #species columns not to use
+    df_to_use <- data %>% 
+      select(-all_of(to_drop))
+    
+    # Drop NA values from subsequent species columns to prevent pointless
+    # row duplication.
+    df_to_append <- df_to_use[!is.na(df_to_use[,2]),]
+    
+    # Empty social column to avoid duplication in later counts
+    df_to_append$sociala <- NA
+    
+    #Synchronize names and append
+    names(df_to_append) <- names(data_new)
+    data_new <- bind_rows(data_new, df_to_append)
+  }
+
   data_new <- data_new %>% 
     rename(art = art_1)
   
