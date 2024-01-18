@@ -123,23 +123,35 @@ remove_uncertain_data <- function(data){
 }
 
 #Spread the data so that it counts the species occurrences per night.
-spread_by_date <- function(data, startdate="2023/3/1", enddate="2023/12/15"){
+spread_by_date <- function(data, 
+                           startdate="2023/3/1", 
+                           enddate="2023/12/15"){
   # Generate a date series for joining data on
   time_series <- seq(as.Date(startdate), as.Date(enddate), "days") %>% 
     str_replace_all("-","") %>% 
     as.data.frame()
   names(time_series) <- "date_time"
-  
-  names(data)[names(data) == ''] <- 'Blank'
+
   
   # Spread the data to wide format and count species by day 
-  date_count <- data %>%
+  species_count <- data %>%
     count(date_time, art) %>%
     pivot_wider(names_from = art,
                 values_from = n, values_fill = 0)
+  # Spread the data to wide format and count social calls by day
+  social_calls <- data[!is.na(data$sociala),] %>% 
+    droplevels()
+  
+  social_calls$sociala <- paste0("Social_",str_to_title(social_calls$sociala))
+  
+  social_count <- social_calls %>%
+    count(date_time, sociala) %>%
+    pivot_wider(names_from = sociala,
+                values_from = n, values_fill = 0)
   
   # Join species info on time series
-  data <- left_join(time_series, date_count)  
+  data <- left_join(time_series, species_count)  
+  data <- left_join(data, social_count)
   
   data
 }
@@ -154,19 +166,6 @@ sum_observations <- function(data){
   data  
 }
 
-count_social_calls <- function(obs_data, call_data){
-  call_data$sociala <- call_data$sociala %>% 
-    is.na() %>% 
-    if_else(0, 1)
-  
-  call_data <- call_data %>%  
-    group_by(date_time) %>%
-    summarise(n_social_calls = sum(sociala))
-  
-  data <- left_join(obs_data, call_data)
-  
-  data
-}
 
 # Attach number of calls per night
 attach_obs_count <- function(data, n_recordings){

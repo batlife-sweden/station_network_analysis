@@ -21,6 +21,7 @@ main <- function(save_report_copy = FALSE){
   
   n_recording_day <- data %>% 
     count(date_time)
+  names(n_recording_day) <- c("date_time", "tot_obs_day")
   
   # Convert to long format based on species columns
   data <- unify_columns(data=data,
@@ -49,13 +50,11 @@ main <- function(save_report_copy = FALSE){
   
   social_calls <- data %>% 
     select(c("sociala", "date_time"))
-  # Spread the data so that it counts the species occurrences per night.
+  # Spread the data so that it counts the species occurrences  and 
+  # social calls per night.
   data <- spread_by_date(data)
 
-  # Check for social calls and attach as appropriate
-  data <-count_social_calls(data, social_calls)
-  
-  # Attach number of calls per night
+   # Attach number of calls per night
   data <- attach_obs_count(data, n_recording_day)
   
   #TODO: Connect to SMHI-API and get mean weather values for the night
@@ -64,5 +63,5 @@ main <- function(save_report_copy = FALSE){
 }
 
 data_file <- main()
-write_xlsx(data_file, "./example.xlsx")
+write_xlsx(data, "./example.xlsx")
 
