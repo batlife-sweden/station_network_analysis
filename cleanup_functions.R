@@ -153,6 +153,10 @@ spread_by_date <- function(data,
   data <- left_join(time_series, species_count)  
   data <- left_join(data, social_count)
   
+  
+  #TODO: find rows where social calls are NA, but  not obs.
+  # use test[logical vector,c("two","three")] <- list(rep(0, ncol(social)-1))[[1]]
+  # to set all the colums there (except date) as 0
   data
 }
 
