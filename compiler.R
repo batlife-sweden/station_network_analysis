@@ -63,5 +63,5 @@ main <- function(save_report_copy = FALSE){
 }
 
 data_file <- main()
-write_xlsx(data, "./example.xlsx")
+write_xlsx(data_file, "./example.xlsx")
 

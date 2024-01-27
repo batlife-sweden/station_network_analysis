@@ -150,12 +150,8 @@ spread_by_date <- function(data,
                 values_from = n, values_fill = 0)
   
   # Join species info on time series
-  # Replace NA with 0-values for species to make graphs smoother
-  data <- left_join(time_series, species_count) %>% 
-    replace(is.na(.), 0) 
-  
-  # Social calls are left with NA values so we do not have to plot hundreds
-  # of 0-values in a later stage
+
+  data <- left_join(time_series, species_count)
   data <- left_join(data, social_count)
   
   data
@@ -175,5 +171,5 @@ sum_observations <- function(data){
 # Attach number of calls per night
 attach_obs_count <- function(data, n_recordings){
   data <-left_join(data,n_recording_day)
-  data$tot_obs_day[is.na(data$tot_obs_day)] <- 0 
+  data
 }
