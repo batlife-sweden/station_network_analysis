@@ -6,6 +6,8 @@
 #Lockfiles
 .~*
 *.tmp
+.xmp
 
 # Plot print directory
 plots/*
+figures/*
