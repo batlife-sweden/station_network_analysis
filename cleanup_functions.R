@@ -6,7 +6,7 @@ cleanup_columns <- function(data){
               "skriv bokstaven h för hjälp", "Validering?"))
   
   data <- data %>%
-    clean_names() 
+    janitor::clean_names() 
   
   data
 }
@@ -16,8 +16,8 @@ cleanup_columns <- function(data){
 cleanup_species_names <-function(data, 
                                  correction_file="corrections.json"){
   # Change entries to title case.
-  data$art <- str_replace_all(data$art, " ", "")
-  data$art <- str_to_title(data$art)
+  data$art <- stringr::str_replace_all(data$art, " ", "")
+  data$art <- stringr::str_to_title(data$art)
   
   # Read the file with known erroneous entries and their corresponding 
   # corrections. Store known erroneous entries in incorrect_names.
@@ -51,6 +51,7 @@ unify_columns <- function(data,
   # Extract all the other species columns 
   col_count <- length(species_columns)
 
+  #TODO: Rewrite teh first two rows of this loop. Surely there is an easier way to select the "art"-columns
   for( i in 1:(col_count-1)){
     to_drop <- species_columns[-(i+1)] #species columns not to use
     df_to_use <- data %>% 
@@ -115,7 +116,7 @@ remove_uncertain_data <- function(data){
     }
     
     #If there is a ?, remove it. Assumes the ? is the last character
-    if( !is.na(str_extract(curr_species, "\\?"))){
+    if( !is.na(stringr::str_extract(curr_species, "\\?"))){
       data$art[i] <- substr(curr_species, 1, nchar(curr_species)-1)
     }
   }
@@ -128,7 +129,7 @@ spread_by_date <- function(data,
                            enddate="2023/12/15"){
   # Generate a date series for joining data on
   time_series <- seq(as.Date(startdate), as.Date(enddate), "days") %>% 
-    str_replace_all("-","") %>% 
+    stringr::str_replace_all("-","") %>% 
     as.data.frame()
   names(time_series) <- "date_time"
 
@@ -142,7 +143,7 @@ spread_by_date <- function(data,
   social_calls <- data[!is.na(data$sociala),] %>% 
     droplevels()
   
-  social_calls$sociala <- paste0("Social_",str_to_title(social_calls$sociala))
+  social_calls$sociala <- paste0("Social_",stringr::str_to_title(social_calls$sociala))
   
   social_count <- social_calls %>%
     count(date_time, sociala) %>%
