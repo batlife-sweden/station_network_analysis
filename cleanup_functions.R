@@ -3,11 +3,26 @@
 cleanup_columns <- function(data){
   data <- data %>% 
     select(-c("Autoklassat som", "Vem", 
-              "skriv bokstaven h för hjälp", "Validering?"))
+              "Hjälp", "Verifiering?"))
   
   data <- data %>%
-    janitor::clean_names() 
+    janitor::clean_names()
+  date_times = substr(data$filnamn, start=17, stop=35)
   
+  new_date_time <- c()
+  for( dt in 1:length(date_times)){
+    year = substr(date_times[dt], start=1, stop=4)
+    month = substr(date_times[dt], start=6, stop=7)
+    day = substr(date_times[dt], start=9, stop=10)
+    hour = substr(date_times[dt], start=12, stop=13)
+    minute = substr(date_times[dt], start=15, stop=16)
+    sec = substr(date_times[dt], start=18, stop=19)
+    
+    new_dt = paste0(year,month,day," ",hour,":", minute)
+    new_date_time <- append(new_date_time, new_dt)
+  }
+  data$date_time <- new_date_time
+
   data
 }
 
@@ -76,12 +91,12 @@ unify_columns <- function(data,
 }
 
 # Takes a datetime object and coverts it to YYYYMMDD. If the time of day is less
-# than hour, subtract those man many hours to shift the date to previous day.
+# than hour, subtract those many hours to shift the date to previous day.
 set_correct_date <- function(datetime, hour= 11){
   current_hour <- format(datetime, format = "%H") %>% 
     as.integer()
   
-  if(current_hour < hour){
+  if( current_hour<hour){
     datetime <- datetime - (hour * 3600)
   }
   date <- format(datetime, format("%Y%m%d"))

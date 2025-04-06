@@ -9,7 +9,7 @@ require(writexl)
 
 source("./cleanup_functions.R")
 
-input_name <- "goholm2023.xlsx"
+input_name <- "ottenby.xlsx"
 output_file_name <- "example_output.xlsx"
 
 save_report_copy = FALSE #Ignore this. Part of development
