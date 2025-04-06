@@ -140,8 +140,8 @@ remove_uncertain_data <- function(data){
 
 #Spread the data so that it counts the species occurrences per night.
 spread_by_date <- function(data, 
-                           startdate="2023/3/1", 
-                           enddate="2023/12/15"){
+                           startdate="2024/3/1", 
+                           enddate="2024/12/15"){
   # Generate a date series for joining data on
   time_series <- seq(as.Date(startdate), as.Date(enddate), "days") %>% 
     stringr::str_replace_all("-","") %>% 

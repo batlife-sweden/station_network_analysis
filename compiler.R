@@ -7,6 +7,8 @@ require(stringr)
 require(jsonlite)
 require(writexl)
 
+year = "2024" #Year from analysis
+
 source("./cleanup_functions.R")
 
 input_name <- "ottenby.xlsx"
@@ -57,7 +59,9 @@ social_calls <- data %>%
   select(c("sociala", "date_time"))
 # Spread the data so that it counts the species occurrences  and 
 # social calls per night.
-data <- spread_by_date(data)
+data <- spread_by_date(data,
+                       startdate = paste0(year, "/3/1"), 
+                       enddate=paste0(year,"/12/15"))
 
  # Attach number of calls per night
 data <- attach_obs_count(data, n_recording_day)
