@@ -18,7 +18,7 @@ save_report_copy = FALSE #Ignore this. Part of development
 
 
 # Load the data file
-data_raw <- read_xlsx(input_name)
+data_raw <- read_xlsx(input_name, na = "X")
 
 # Change columns to snake case and drop unused columns
 data <- cleanup_columns(data_raw)

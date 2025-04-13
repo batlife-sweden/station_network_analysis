@@ -10,7 +10,7 @@ cleanup_columns <- function(data){
   
   data <- data %>% drop_na(filnamn)
   date_times = substr(data$filnamn, start=16, stop=35)
-  
+  data$art_1[is.na(data$art_1)] <- 'X'
   
   new_date_time <- c()
   for( dt in 1:length(date_times)){
