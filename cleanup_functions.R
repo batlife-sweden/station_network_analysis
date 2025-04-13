@@ -7,7 +7,10 @@ cleanup_columns <- function(data){
   
   data <- data %>%
     janitor::clean_names()
-  date_times = substr(data$filnamn, start=17, stop=35)
+  
+  data <- data %>% drop_na(filnamn)
+  date_times = substr(data$filnamn, start=16, stop=35)
+  
   
   new_date_time <- c()
   for( dt in 1:length(date_times)){
@@ -96,8 +99,10 @@ set_correct_date <- function(datetime, hour= 11){
   current_hour <- format(datetime, format = "%H") %>% 
     as.integer()
   
-  if( current_hour<hour){
-    datetime <- datetime - (hour * 3600)
+  for( i in 1:length(current_hour)){
+    if( current_hour[i] < hour){
+      datetime[i] <- datetime[i] - ((hour+1) * 3600)
+    }
   }
   date <- format(datetime, format("%Y%m%d"))
   date

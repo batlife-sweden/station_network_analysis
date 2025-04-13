@@ -11,7 +11,7 @@ year = "2024" #Year from analysis
 
 source("./cleanup_functions.R")
 
-input_name <- "ottenby.xlsx"
+input_name <- "Göholm 2024.xlsx"
 output_file_name <- "example_output.xlsx"
 
 save_report_copy = FALSE #Ignore this. Part of development
